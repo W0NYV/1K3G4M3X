@@ -12,6 +12,7 @@ namespace W0NYV.IkegameX
         //Model
         [SerializeField] private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
         [SerializeField] CameraFilter _cameraFilter;
+        [SerializeField] MeshRenderer _quad;
         private CalcTempo _calcTempo;
 
         //View
@@ -20,6 +21,7 @@ namespace W0NYV.IkegameX
         [SerializeField] private Text _tempoText;
         
         [SerializeField] private Toggle _pixelateToggle;
+        [SerializeField] private Toggle _blockWaveToggle;
 
         private void Awake() {
 
@@ -45,6 +47,18 @@ namespace W0NYV.IkegameX
             _pixelateToggle.onValueChanged.AddListener(val => 
             {
                 _cameraFilter.enabled = val;
+            });
+
+            _blockWaveToggle.onValueChanged.AddListener(val =>
+            {
+                if(val)
+                {
+                    _quad.material.SetFloat("_IsOn_Wave", 1.0f);
+                }
+                else
+                {
+                    _quad.material.SetFloat("_IsOn_Wave", 0.0f);
+                }
             });
 
         }
