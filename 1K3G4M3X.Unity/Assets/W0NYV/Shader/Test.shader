@@ -4,6 +4,11 @@ Shader "Unlit/Test"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _MaskTex ("MaskTexture", 2D) = "white" {}
+
+        _IsOn_Wave ("IsOn_Wave", float) = 0.0
+        _Segment_Wave ("Segment_Wave", Range(1.0, 50.0)) = 20.0
+        _Gap_Wave ("Gap_Wave", Range(1.0, 10.0)) = 2.0
+        _Amplitude_Wave ("Amplitude_Wave", Range(0.0, 1.0)) = 0.1
     }
     SubShader
     {
@@ -38,6 +43,11 @@ Shader "Unlit/Test"
             sampler2D _MainTex;
             sampler2D _MaskTex;
 
+            float _Segment_Wave;
+            float _Gap_Wave;
+            float _Amplitude_Wave;
+            float _IsOn_Wave;
+
             float4 _MainTex_ST;
 
             v2f vert (appdata v)
@@ -52,9 +62,16 @@ Shader "Unlit/Test"
             fixed4 frag (v2f i) : SV_Target
             {
 
+                float t = _Time.y * 120.0 / 60.0;
+
+
+                float2 newUV = i.uv;
+
+                newUV.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
+
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                fixed4 col2 = tex2D(_MaskTex, i.uv);
+                fixed4 col = tex2D(_MainTex, newUV);
+                fixed4 col2 = tex2D(_MaskTex, newUV);
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

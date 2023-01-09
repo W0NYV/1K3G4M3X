@@ -30,9 +30,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Amplitude_Wave: 0.02
+    - _Gap_Wave: 2
+    - _IsOn_Wave: 0
     - _MaxHeight_Pixelate: 1080
     - _MaxWidth_Pixelate: 1920
     - _MinHeight_Pixelate: 9
     - _MinWidth_Pixelate: 16
+    - _Segment_Wave: 20
+    - _Test: 200
     m_Colors: []
   m_BuildTextureStacks: []
