@@ -11,11 +11,17 @@ namespace W0NYV.IkegameX
 
         //Model
         [SerializeField] private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
+        private CalcTempo _calcTempo;
 
         //View
         [SerializeField] private Dropdown _dropdown;
+        [SerializeField] private Button _tempoButton;
+        [SerializeField] private Text _tempoText;
 
         private void Awake() {
+
+            //誰がnewする問題, Extenject~~~
+            _calcTempo = new CalcTempo();
 
             SetDropdownOption();
 
@@ -23,8 +29,17 @@ namespace W0NYV.IkegameX
             {
                 _selfieSegmentationBarracudaTest.SetWebCamera(val);
             });
+
+            _tempoButton.onClick.AddListener(() => 
+            {
+                _calcTempo.SetElement();
+                _calcTempo.Calculate();
+                _tempoText.text = "TEMPO: " + _calcTempo.GetBPM().ToString("0.00");
+            });
+
         }
 
+        //本当はdropdownが持っておくべき
         private void SetDropdownOption()
         {
             foreach (var device in WebCamTexture.devices)
