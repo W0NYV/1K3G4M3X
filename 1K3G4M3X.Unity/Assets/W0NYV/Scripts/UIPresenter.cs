@@ -10,20 +10,33 @@ namespace W0NYV.IkegameX
     {
 
         //Model
-        [SerializeField] private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
-        [SerializeField] CameraFilter _cameraFilter;
-        [SerializeField] MeshRenderer _quad;
         private CalcTempo _calcTempo;
 
+        [SerializeField] private CameraFilter _cameraFilter;
+
+        [SerializeField] private GameObject _quad;
+        private MeshRenderer _meshRenderer;
+        private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
+        
         //View
         [SerializeField] private Dropdown _dropdown;
+
+        [Header("Tempo")]
         [SerializeField] private Button _tempoButton;
         [SerializeField] private Text _tempoText;
-        
+
+        [Header("Pixelate")]
         [SerializeField] private Toggle _pixelateToggle;
+        
+        [Header("BlockWave")]
         [SerializeField] private Toggle _blockWaveToggle;
+        [SerializeField] private Slider _blockWaveSlider_Segment;
+        [SerializeField] private Slider _blockWaveSlider_Gap;
+        [SerializeField] private Slider _blockWaveSlider_Amplitude;
 
         private void Awake() {
+
+            GetComponentToQuad();
 
             //誰がnewする問題, Extenject~~~
             _calcTempo = new CalcTempo();
@@ -44,23 +57,51 @@ namespace W0NYV.IkegameX
                 _cameraFilter.Filter.SetFloat("_BPM", _calcTempo.GetBPM());
             });
 
+            #region Pixelate
             _pixelateToggle.onValueChanged.AddListener(val => 
             {
                 _cameraFilter.enabled = val;
             });
+            #endregion
 
+            #region BlockWave
             _blockWaveToggle.onValueChanged.AddListener(val =>
             {
                 if(val)
                 {
-                    _quad.material.SetFloat("_IsOn_Wave", 1.0f);
+                    _meshRenderer.material.SetFloat("_IsOn_Wave", 1.0f);
                 }
                 else
                 {
-                    _quad.material.SetFloat("_IsOn_Wave", 0.0f);
+                    _meshRenderer.material.SetFloat("_IsOn_Wave", 0.0f);
                 }
             });
 
+            _blockWaveSlider_Segment.onValueChanged.AddListener(val =>
+            {
+                float value = val * 49f + 1f;
+                _meshRenderer.material.SetFloat("_Segment_Wave", value);
+            });
+
+            _blockWaveSlider_Gap.onValueChanged.AddListener(val =>
+            {
+                float value = val * 9f + 1f;
+                _meshRenderer.material.SetFloat("_Gap_Wave", value);
+            });
+
+            _blockWaveSlider_Amplitude.onValueChanged.AddListener(val =>
+            {
+                _meshRenderer.material.SetFloat("_Amplitude_Wave", val);
+            });
+
+            #endregion
+
+        }
+
+        private void GetComponentToQuad()
+        {
+            _quad.TryGetComponent<MeshRenderer>(out _meshRenderer);
+            _quad.TryGetComponent<SelfieSegmentationBarracudaTest>(out _selfieSegmentationBarracudaTest);
         }
 
         //本当はdropdownが持っておくべき

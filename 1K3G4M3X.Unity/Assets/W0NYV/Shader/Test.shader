@@ -9,7 +9,6 @@ Shader "Unlit/Test"
         _Segment_Wave ("Segment_Wave", Range(1.0, 50.0)) = 20.0
         _Gap_Wave ("Gap_Wave", Range(1.0, 10.0)) = 2.0
         _Amplitude_Wave ("Amplitude_Wave", Range(0.0, 1.0)) = 0.1
-
     }
     SubShader
     {
