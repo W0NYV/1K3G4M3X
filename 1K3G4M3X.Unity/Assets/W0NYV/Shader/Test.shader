@@ -37,6 +37,7 @@ Shader "Unlit/Test"
 
             sampler2D _MainTex;
             sampler2D _MaskTex;
+
             float4 _MainTex_ST;
 
             v2f vert (appdata v)
@@ -50,6 +51,7 @@ Shader "Unlit/Test"
 
             fixed4 frag (v2f i) : SV_Target
             {
+
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
                 fixed4 col2 = tex2D(_MaskTex, i.uv);

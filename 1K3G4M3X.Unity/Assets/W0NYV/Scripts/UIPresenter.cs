@@ -11,12 +11,15 @@ namespace W0NYV.IkegameX
 
         //Model
         [SerializeField] private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
+        [SerializeField] CameraFilter _cameraFilter;
         private CalcTempo _calcTempo;
 
         //View
         [SerializeField] private Dropdown _dropdown;
         [SerializeField] private Button _tempoButton;
         [SerializeField] private Text _tempoText;
+        
+        [SerializeField] private Toggle _pixelateToggle;
 
         private void Awake() {
 
@@ -35,6 +38,13 @@ namespace W0NYV.IkegameX
                 _calcTempo.SetElement();
                 _calcTempo.Calculate();
                 _tempoText.text = "TEMPO: " + _calcTempo.GetBPM().ToString("0.00");
+
+                _cameraFilter.Filter.SetFloat("_BPM", _calcTempo.GetBPM());
+            });
+
+            _pixelateToggle.onValueChanged.AddListener(val => 
+            {
+                _cameraFilter.enabled = val;
             });
 
         }
