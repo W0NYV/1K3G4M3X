@@ -55,6 +55,8 @@ namespace W0NYV.IkegameX
                 _tempoText.text = "TEMPO: " + _calcTempo.GetBPM().ToString("0.00");
 
                 _cameraFilter.Filter.SetFloat("_BPM", _calcTempo.GetBPM());
+                _meshRenderer.material.SetFloat("_BPM", _calcTempo.GetBPM());
+
             });
 
             #region Pixelate

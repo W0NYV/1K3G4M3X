@@ -5,10 +5,16 @@ Shader "Unlit/Test"
         _MainTex ("Texture", 2D) = "white" {}
         _MaskTex ("MaskTexture", 2D) = "white" {}
 
+        _BPM ("BPM", float) = 120.0
+
+        // BlockWave
         _IsOn_Wave ("IsOn_Wave", float) = 0.0
         _Segment_Wave ("Segment_Wave", Range(1.0, 50.0)) = 20.0
         _Gap_Wave ("Gap_Wave", Range(1.0, 10.0)) = 2.0
         _Amplitude_Wave ("Amplitude_Wave", Range(0.0, 1.0)) = 0.1
+
+        // HumanWave
+        _IsOn_HumanWave ("IsOn_HumanWave", float) = 0.0
     }
     SubShader
     {
@@ -43,10 +49,16 @@ Shader "Unlit/Test"
             sampler2D _MainTex;
             sampler2D _MaskTex;
 
+            float _BPM;
+
+            //BlockWave
             float _Segment_Wave;
             float _Gap_Wave;
             float _Amplitude_Wave;
             float _IsOn_Wave;
+
+            //HumanWave
+            float _IsOn_HumanWave;
 
             float4 _MainTex_ST;
 
@@ -59,19 +71,42 @@ Shader "Unlit/Test"
                 return o;
             }
 
+            float2x2 Rot(float r)
+            {
+                return float2x2(cos(r), -sin(r), sin(r), cos(r));
+            }
+
+            fixed4 HumanWave(float2 uv, float t, float speed, float rotSpeed, float offset, float frequency, float amplitude)
+            {
+                float2 humanWaveUV = uv;
+                humanWaveUV = (humanWaveUV - 0.5) * 2.0;
+                humanWaveUV = mul(humanWaveUV, Rot(t * rotSpeed));
+                humanWaveUV.x += t * speed;
+
+                float l = amplitude / length(frac(humanWaveUV.x * frequency)-0.5);
+                float l2 = amplitude / length(frac((humanWaveUV.x + offset) * 5.0)-0.5);
+                float l3 = amplitude / length(frac((humanWaveUV.x - offset) * 5.0)-0.5);
+
+                return fixed4(l, l2, l3, 1.0);
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
 
-                float t = _Time.y * 120.0 / 60.0;
+                float t = _Time.y * _BPM / 60.0;
 
+                float2 _uv = i.uv;
+                float2 p = (_uv - 0.5) * 2.0;
 
-                float2 newUV = i.uv;
-
-                newUV.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
+                //UV関連
+                _uv.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
 
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, newUV);
-                fixed4 col2 = tex2D(_MaskTex, newUV);
+                fixed4 col = tex2D(_MainTex, _uv);
+                fixed4 col2 = tex2D(_MaskTex, _uv);
+
+                //色関連
+                col = _IsOn_HumanWave == 1.0 ? HumanWave(_uv, t, 0.5, 0.0625, 0.05, 2.0, 0.05) : col;
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
