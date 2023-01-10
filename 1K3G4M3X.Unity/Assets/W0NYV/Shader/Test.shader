@@ -90,6 +90,35 @@ Shader "Unlit/Test"
                 return fixed4(l, l2, l3, 1.0);
             }
 
+            fixed4 TileXAlpha(float2 p, float t)
+            {
+
+                float seq = floor(fmod(t, 4.0));
+                
+                p.x += 0.75;
+                float l = step(length(p.x), 1.0/4.0);
+                
+                if(seq > 2.9)
+                {
+                    p.x -= 0.5;
+                    l += step(length(p.x), 1.0/4.0);
+                }
+                
+                if(seq > 1.99)
+                {
+                    p.x -= 0.5;
+                    l += step(length(p.x), 1.0/4.0);
+                }
+                
+                if(seq > 0.99)
+                {
+                    p.x -= 0.5;
+                    l += step(length(p.x), 1.0/4.0);
+                }
+
+                return fixed4(l, l, l, 1.0);
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
 
@@ -100,6 +129,8 @@ Shader "Unlit/Test"
 
                 //UV関連
                 _uv.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
+                
+                _uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
 
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, _uv);
@@ -113,7 +144,7 @@ Shader "Unlit/Test"
 
                 col.w = col2.x;
 
-                return col;
+                return col*TileXAlpha(p, t);
             }
             ENDCG
         }
