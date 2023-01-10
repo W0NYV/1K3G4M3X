@@ -26,7 +26,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BPM: 93.98818
+    - _BPM: 142.70563
     - _MaxHeight_Pixelate: 1080
     - _MaxWidth_Pixelate: 1920
     - _MinHeight_Pixelate: 9
