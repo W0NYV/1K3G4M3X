@@ -1,4 +1,4 @@
-Shader "Unlit/Test"
+Shader "Unlit/HumanSegmentation"
 {
     Properties
     {
@@ -15,6 +15,11 @@ Shader "Unlit/Test"
 
         // HumanWave
         _IsOn_HumanWave ("IsOn_HumanWave", float) = 0.0
+        _Speed_HumanWave ("Speed_HumanWave", Range(0.1, 0.4)) = 0.1
+        _RotSpeed_HumanWave ("RotSpeed_HumanWave", Range(0.0, 0.2)) = 0.0625
+        _Offset_HumanWave ("Offset_HumanWave", Range(0.0, 1.6)) = 0.05
+        _Frequency_HumanWave ("Frequency_HumanWave", Range(0.1, 1.0)) = 0.25
+        _Amplitude_HumanWave ("Amplitude_HumanWave", Range(0.01, 0.1)) = 0.05
     }
     SubShader
     {
@@ -59,6 +64,11 @@ Shader "Unlit/Test"
 
             //HumanWave
             float _IsOn_HumanWave;
+            float _Speed_HumanWave;
+            float _RotSpeed_HumanWave;
+            float _Offset_HumanWave;
+            float _Frequency_HumanWave;
+            float _Amplitude_HumanWave;
 
             float4 _MainTex_ST;
 
@@ -83,9 +93,9 @@ Shader "Unlit/Test"
                 humanWaveUV = mul(humanWaveUV, Rot(t * rotSpeed));
                 humanWaveUV.x += t * speed;
 
-                float l = amplitude / length(frac(humanWaveUV.x * frequency)-0.5);
-                float l2 = amplitude / length(frac((humanWaveUV.x + offset) * 5.0)-0.5);
-                float l3 = amplitude / length(frac((humanWaveUV.x - offset) * 5.0)-0.5);
+                float l = amplitude / length(frac((humanWaveUV.x * frequency)*5.0)-0.5);
+                float l2 = amplitude / length(frac((humanWaveUV.x + offset) * frequency * 5.0)-0.5);
+                float l3 = amplitude / length(frac((humanWaveUV.x - offset) * frequency * 5.0)-0.5);
 
                 return fixed4(l, l2, l3, 1.0);
             }
@@ -130,21 +140,25 @@ Shader "Unlit/Test"
                 //UV関連
                 _uv.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
                 
-                _uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
+                //_uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
 
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, _uv);
                 fixed4 col2 = tex2D(_MaskTex, _uv);
 
                 //色関連
-                col = _IsOn_HumanWave == 1.0 ? HumanWave(_uv, t, 0.5, 0.0625, 0.05, 2.0, 0.05) : col;
+                col = _IsOn_HumanWave == 1.0 
+                ? 
+                    HumanWave(_uv, t, _Speed_HumanWave, _RotSpeed_HumanWave, _Offset_HumanWave, _Frequency_HumanWave, _Amplitude_HumanWave) 
+                : 
+                    col;
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
 
                 col.w = col2.x;
 
-                return col*TileXAlpha(p, t);
+                return col; //*TileXAlpha(p, t);
             }
             ENDCG
         }
