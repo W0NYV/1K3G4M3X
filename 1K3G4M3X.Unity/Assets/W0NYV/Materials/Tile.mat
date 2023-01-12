@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Pixelate
-  m_Shader: {fileID: 4800000, guid: e3222907ce29d004d86f3410a1c4651a, type: 3}
+  m_Name: Tile
+  m_Shader: {fileID: 4800000, guid: 4c902e4d4a005514b9f27bf0836e321c, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -25,11 +25,6 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats:
-    - _BPM: 158.96748
-    - _MaxHeight_Pixelate: 1080
-    - _MaxWidth_Pixelate: 1920
-    - _MinHeight_Pixelate: 9
-    - _MinWidth_Pixelate: 16
+    m_Floats: []
     m_Colors: []
   m_BuildTextureStacks: []

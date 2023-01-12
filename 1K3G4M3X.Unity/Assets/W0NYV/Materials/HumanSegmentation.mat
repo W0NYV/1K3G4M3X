@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Unlit_Test
+  m_Name: HumanSegmentation
   m_Shader: {fileID: 4800000, guid: bccf8f5ecbd3e094289e857ac7ae17ce, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -31,7 +31,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _Amplitude_Wave: 0.02
+    - _BPM: 120
     - _Gap_Wave: 2
+    - _IsOn_HumanWave: 0
     - _IsOn_Wave: 0
     - _MaxHeight_Pixelate: 1080
     - _MaxWidth_Pixelate: 1920
