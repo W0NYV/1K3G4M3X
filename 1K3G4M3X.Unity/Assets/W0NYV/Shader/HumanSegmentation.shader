@@ -20,6 +20,9 @@ Shader "Unlit/HumanSegmentation"
         _Offset_HumanWave ("Offset_HumanWave", Range(0.0, 1.6)) = 0.05
         _Frequency_HumanWave ("Frequency_HumanWave", Range(0.1, 1.0)) = 0.25
         _Amplitude_HumanWave ("Amplitude_HumanWave", Range(0.01, 0.1)) = 0.05
+
+        // Tile
+        _IsOn_Tile ("IsOn_Tile", float) = 0.0
     }
     SubShader
     {
@@ -70,6 +73,9 @@ Shader "Unlit/HumanSegmentation"
             float _Frequency_HumanWave;
             float _Amplitude_HumanWave;
 
+            //Tile
+            float _IsOn_Tile;
+
             float4 _MainTex_ST;
 
             v2f vert (appdata v)
@@ -103,30 +109,58 @@ Shader "Unlit/HumanSegmentation"
             fixed4 TileXAlpha(float2 p, float t)
             {
 
-                float seq = floor(fmod(t, 4.0));
+                float seq = floor(fmod(t*4.0, 8.0));
                 
-                p.x += 0.75;
-                float l = step(length(p.x), 1.0/4.0);
-                
-                if(seq > 2.9)
+                float l = 0.0;
+
+                if(seq > 3.9) //y
                 {
-                    p.x -= 0.5;
-                    l += step(length(p.x), 1.0/4.0);
+                    p.y += 0.75;
+                    l = step(length(p.y), 1.0/4.0);
+                    
+                    if(seq > 6.9)
+                    {
+                        p.y -= 0.5;
+                        l += step(length(p.y), 1.0/4.0);
+                    }
+                    
+                    if(seq > 5.9)
+                    {
+                        p.y -= 0.5;
+                        l += step(length(p.y), 1.0/4.0);
+                    }
+                    
+                    if(seq > 4.9)
+                    {
+                        p.y -= 0.5;
+                        l += step(length(p.y), 1.0/4.0);
+                    }
                 }
-                
-                if(seq > 1.99)
-                {
-                    p.x -= 0.5;
-                    l += step(length(p.x), 1.0/4.0);
-                }
-                
-                if(seq > 0.99)
-                {
-                    p.x -= 0.5;
-                    l += step(length(p.x), 1.0/4.0);
+                else //x
+                {         
+                    p.x += 0.75;
+                    l = step(length(p.x), 1.0/4.0);
+                    
+                    if(seq > 2.9)
+                    {
+                        p.x -= 0.5;
+                        l += step(length(p.x), 1.0/4.0);
+                    }
+                    
+                    if(seq > 1.9)
+                    {
+                        p.x -= 0.5;
+                        l += step(length(p.x), 1.0/4.0);
+                    }
+                    
+                    if(seq > 0.9)
+                    {
+                        p.x -= 0.5;
+                        l += step(length(p.x), 1.0/4.0);
+                    }
                 }
 
-                return fixed4(l, l, l, 1.0);
+                return fixed4(l, l, l, seq);
             }
 
             fixed4 frag (v2f i) : SV_Target
@@ -140,7 +174,17 @@ Shader "Unlit/HumanSegmentation"
                 //UV関連
                 _uv.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
                 
-                //_uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
+                if(_IsOn_Tile == 1)
+                {
+                    if(TileXAlpha(p, t).w > 3.9)
+                    {
+                        _uv.y = (frac(_uv.y*4.0) / 4.0) + 0.375;
+                    }
+                    else
+                    {
+                        _uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
+                    }
+                }
 
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, _uv);
@@ -158,7 +202,9 @@ Shader "Unlit/HumanSegmentation"
 
                 col.w = col2.x;
 
-                return col; //*TileXAlpha(p, t);
+                col = _IsOn_Tile == 1.0 ? col * fixed4(TileXAlpha(p, t).rgb, 1.0) : col;
+
+                return col;
             }
             ENDCG
         }

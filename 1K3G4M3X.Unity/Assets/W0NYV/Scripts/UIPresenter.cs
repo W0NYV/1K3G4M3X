@@ -42,6 +42,9 @@ namespace W0NYV.IkegameX
         [SerializeField] private Klak.VJUI.Knob _humanWaveKnob_Frequency;
         [SerializeField] private Klak.VJUI.Knob _humanWaveKnob_Amplitude;
 
+        [Header("Tile")]
+        [SerializeField] private Klak.VJUI.Toggle _TileToggle;
+
         private void Awake() {
 
             GetComponentToQuad();
@@ -149,6 +152,20 @@ namespace W0NYV.IkegameX
                 _meshRenderer.material.SetFloat("_Amplitude_HumanWave", value);
             });
 
+            #endregion
+
+            #region  Tile
+            _TileToggle.onValueChanged.AddListener(val => 
+            {
+                if(val)
+                {
+                    _meshRenderer.material.SetFloat("_IsOn_Tile", 1.0f);
+                }
+                else
+                {
+                    _meshRenderer.material.SetFloat("_IsOn_Tile", 0.0f);
+                }
+            });
             #endregion
 
         }
