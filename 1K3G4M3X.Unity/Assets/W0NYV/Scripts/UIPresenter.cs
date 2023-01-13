@@ -114,11 +114,11 @@ namespace W0NYV.IkegameX
             {
                 if(val)
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_HumanWave", 1.0f);
+                    _meshRenderer.material.EnableKeyword("_USE_HUMAN_WAVE");
                 }
                 else
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_HumanWave", 0.0f);
+                    _meshRenderer.material.DisableKeyword("_USE_HUMAN_WAVE");
                 }
             });
 

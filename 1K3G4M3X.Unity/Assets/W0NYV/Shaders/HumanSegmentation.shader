@@ -14,7 +14,7 @@ Shader "Unlit/HumanSegmentation"
         _Amplitude_Wave ("Amplitude_Wave", Range(0.0, 1.0)) = 0.1
 
         // HumanWave
-        _IsOn_HumanWave ("IsOn_HumanWave", float) = 0.0
+        [Toggle(_USE_HUMAN_WAVE)]_UseHumanWave("Use Human Wave", Float) = 0
         _Speed_HumanWave ("Speed_HumanWave", Range(0.1, 0.4)) = 0.1
         _RotSpeed_HumanWave ("RotSpeed_HumanWave", Range(0.0, 0.2)) = 0.0625
         _Offset_HumanWave ("Offset_HumanWave", Range(0.0, 1.6)) = 0.05
@@ -36,10 +36,15 @@ Shader "Unlit/HumanSegmentation"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+
+            #pragma multi_compile _ _USE_HUMAN_WAVE
+
             // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
+            #include "./cginc/HumanWave.cginc"
+            #include "./cginc/TileAlpha.cginc"
 
             struct appdata
             {
@@ -66,7 +71,6 @@ Shader "Unlit/HumanSegmentation"
             float _IsOn_Wave;
 
             //HumanWave
-            float _IsOn_HumanWave;
             float _Speed_HumanWave;
             float _RotSpeed_HumanWave;
             float _Offset_HumanWave;
@@ -92,77 +96,6 @@ Shader "Unlit/HumanSegmentation"
                 return float2x2(cos(r), -sin(r), sin(r), cos(r));
             }
 
-            fixed4 HumanWave(float2 uv, float t, float speed, float rotSpeed, float offset, float frequency, float amplitude)
-            {
-                float2 humanWaveUV = uv;
-                humanWaveUV = (humanWaveUV - 0.5) * 2.0;
-                humanWaveUV = mul(humanWaveUV, Rot(t * rotSpeed));
-                humanWaveUV.x += t * speed;
-
-                float l = amplitude / length(frac((humanWaveUV.x * frequency)*5.0)-0.5);
-                float l2 = amplitude / length(frac((humanWaveUV.x + offset) * frequency * 5.0)-0.5);
-                float l3 = amplitude / length(frac((humanWaveUV.x - offset) * frequency * 5.0)-0.5);
-
-                return fixed4(l, l2, l3, 1.0);
-            }
-
-            fixed4 TileXAlpha(float2 p, float t)
-            {
-
-                float seq = floor(fmod(t*4.0, 8.0));
-                
-                float l = 0.0;
-
-                if(seq > 3.9) //y
-                {
-                    p.y += 0.75;
-                    l = step(length(p.y), 1.0/4.0);
-                    
-                    if(seq > 6.9)
-                    {
-                        p.y -= 0.5;
-                        l += step(length(p.y), 1.0/4.0);
-                    }
-                    
-                    if(seq > 5.9)
-                    {
-                        p.y -= 0.5;
-                        l += step(length(p.y), 1.0/4.0);
-                    }
-                    
-                    if(seq > 4.9)
-                    {
-                        p.y -= 0.5;
-                        l += step(length(p.y), 1.0/4.0);
-                    }
-                }
-                else //x
-                {         
-                    p.x += 0.75;
-                    l = step(length(p.x), 1.0/4.0);
-                    
-                    if(seq > 2.9)
-                    {
-                        p.x -= 0.5;
-                        l += step(length(p.x), 1.0/4.0);
-                    }
-                    
-                    if(seq > 1.9)
-                    {
-                        p.x -= 0.5;
-                        l += step(length(p.x), 1.0/4.0);
-                    }
-                    
-                    if(seq > 0.9)
-                    {
-                        p.x -= 0.5;
-                        l += step(length(p.x), 1.0/4.0);
-                    }
-                }
-
-                return fixed4(l, l, l, seq);
-            }
-
             fixed4 frag (v2f i) : SV_Target
             {
 
@@ -176,7 +109,7 @@ Shader "Unlit/HumanSegmentation"
                 
                 if(_IsOn_Tile == 1)
                 {
-                    if(TileXAlpha(p, t).w > 3.9)
+                    if(TileAlpha(p, t).w > 3.9)
                     {
                         _uv.y = (frac(_uv.y*4.0) / 4.0) + 0.375;
                     }
@@ -191,18 +124,16 @@ Shader "Unlit/HumanSegmentation"
                 fixed4 col2 = tex2D(_MaskTex, _uv);
 
                 //色関連
-                col = _IsOn_HumanWave == 1.0 
-                ? 
-                    HumanWave(_uv, t, _Speed_HumanWave, _RotSpeed_HumanWave, _Offset_HumanWave, _Frequency_HumanWave, _Amplitude_HumanWave) 
-                : 
-                    col;
+                #if _USE_HUMAN_WAVE
+                col = HumanWave(_uv, t, _Speed_HumanWave, _RotSpeed_HumanWave, _Offset_HumanWave, _Frequency_HumanWave, _Amplitude_HumanWave);
+                #endif
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
 
                 col.w = col2.x;
 
-                col = _IsOn_Tile == 1.0 ? col * fixed4(TileXAlpha(p, t).rgb, 1.0) : col;
+                col = _IsOn_Tile == 1.0 ? col * fixed4(TileAlpha(p, t).rgb, 1.0) : col;
 
                 return col;
             }
