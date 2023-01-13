@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace W0NYV.IkegameX
 {
-    public class SelfieSegmentationBarracudaTest: MonoBehaviour
+    public class SelfieSegmentationBarracuda: MonoBehaviour
     {
         // Set "Packages/SelfieSegmentationBarracuda/ResourceSet/SelfieSegmentationResource.asset" on the Unity Editor.
         [SerializeField] SelfieSegmentationResource resource;

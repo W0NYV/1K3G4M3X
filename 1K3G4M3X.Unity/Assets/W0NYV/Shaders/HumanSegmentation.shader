@@ -27,6 +27,13 @@ Shader "Unlit/HumanSegmentation"
         _Offset_HumanWave ("Offset_HumanWave", Range(0.0, 1.6)) = 0.05
         _Frequency_HumanWave ("Frequency_HumanWave", Range(0.1, 1.0)) = 0.25
         _Amplitude_HumanWave ("Amplitude_HumanWave", Range(0.01, 0.1)) = 0.05
+
+        // ConstantColor
+        [Toggle(_USE_CONSTANT_COLOR)]_UseConstantColor("Use Constant Color", Float) = 0
+        _R_ConstantColor ("R_ConstantColor", Range(0.0, 1.0)) = 1.0
+        _G_ConstantColor ("G_ConstantColor", Range(0.0, 1.0)) = 1.0
+        _B_ConstantColor ("B_ConstantColor", Range(0.0, 1.0)) = 1.0
+        _Blend_ConstantColor ("Blend_ConstantColor", Range(0.0, 1.0)) = 1.0
     }
     SubShader
     {
@@ -45,6 +52,7 @@ Shader "Unlit/HumanSegmentation"
             #pragma multi_compile _ _USE_HUMAN_WAVE
             #pragma multi_compile _ _USE_TILE
             #pragma multi_compile _ _USE_BLOCK_WAVE
+            #pragma multi_compile _ _USE_CONSTANT_COLOR
 
             // make fog work
             #pragma multi_compile_fog
@@ -89,6 +97,12 @@ Shader "Unlit/HumanSegmentation"
             float _Offset_HumanWave;
             float _Frequency_HumanWave;
             float _Amplitude_HumanWave;
+
+            //ConstantColor
+            float _R_ConstantColor;
+            float _G_ConstantColor;
+            float _B_ConstantColor;
+            float _Blend_ConstantColor;
 
             float4 _MainTex_ST;
 
@@ -141,6 +155,10 @@ Shader "Unlit/HumanSegmentation"
                 //色関連
                 #if _USE_HUMAN_WAVE
                 col = HumanWave(_uv, t, _Speed_HumanWave, _RotSpeed_HumanWave, _Offset_HumanWave, _Frequency_HumanWave, _Amplitude_HumanWave);
+                #endif
+
+                #if _USE_CONSTANT_COLOR
+                col = lerp(col, fixed4(_R_ConstantColor, _G_ConstantColor, _B_ConstantColor, 1.0), _Blend_ConstantColor);
                 #endif
 
                 // apply fog

@@ -14,7 +14,7 @@ namespace W0NYV.IkegameX
 
         [SerializeField] private GameObject _quad;
         private MeshRenderer _meshRenderer;
-        private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
+        private SelfieSegmentationBarracuda _selfieSegmentationBarracuda;
         
         //View
         [SerializeField] private Dropdown _dropdown;
@@ -43,6 +43,13 @@ namespace W0NYV.IkegameX
         [Header("Tile")]
         [SerializeField] private Klak.VJUI.Toggle _TileToggle;
 
+        [Header("ConstantColor")]
+        [SerializeField] private Klak.VJUI.Toggle _ConstantColorToggle;
+        [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_R;
+        [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_G;
+        [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_B;
+        [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_Blend;
+
         private void Awake() {
 
             GetComponentToQuad();
@@ -55,7 +62,7 @@ namespace W0NYV.IkegameX
 
             _dropdown.onValueChanged.AddListener(val => 
             {
-                _selfieSegmentationBarracudaTest.SetWebCamera(val);
+                _selfieSegmentationBarracuda.SetWebCamera(val);
             });
 
             _tempoButton.onButtonDown.AddListener(() => 
@@ -158,7 +165,7 @@ namespace W0NYV.IkegameX
 
             #endregion
 
-            #region  Tile
+            #region Tile
             _TileToggle.onValueChanged.AddListener(val => 
             {
                 if(val)
@@ -172,12 +179,50 @@ namespace W0NYV.IkegameX
             });
             #endregion
 
+            #region ConstantColor
+            _ConstantColorToggle.onValueChanged.AddListener(val => 
+            {
+                if(val)
+                {
+                    _meshRenderer.material.EnableKeyword("_USE_CONSTANT_COLOR");
+                }
+                else
+                {
+                    _meshRenderer.material.DisableKeyword("_USE_CONSTANT_COLOR");
+                }
+            });
+
+            _ConstantColorKnob_R.onValueChanged.AddListener(val =>
+            {
+                float value = val;
+                _meshRenderer.material.SetFloat("_R_ConstantColor", value);
+            });
+
+            _ConstantColorKnob_G.onValueChanged.AddListener(val =>
+            {
+                float value = val;
+                _meshRenderer.material.SetFloat("_G_ConstantColor", value);
+            });
+
+            _ConstantColorKnob_B.onValueChanged.AddListener(val =>
+            {
+                float value = val;
+                _meshRenderer.material.SetFloat("_B_ConstantColor", value);
+            });
+
+            _ConstantColorKnob_Blend.onValueChanged.AddListener(val =>
+            {
+                float value = val;
+                _meshRenderer.material.SetFloat("_Blend_ConstantColor", value);
+            });
+            #endregion
+
         }
 
         private void GetComponentToQuad()
         {
             _quad.TryGetComponent<MeshRenderer>(out _meshRenderer);
-            _quad.TryGetComponent<SelfieSegmentationBarracudaTest>(out _selfieSegmentationBarracudaTest);
+            _quad.TryGetComponent<SelfieSegmentationBarracuda>(out _selfieSegmentationBarracuda);
         }
 
         //本当はUIPresenterに書きたくない
@@ -198,6 +243,12 @@ namespace W0NYV.IkegameX
             _meshRenderer.material.SetFloat("_Offset_HumanWave", 0.0f);
             _meshRenderer.material.SetFloat("_Frequency_HumanWave", 0.1f);
             _meshRenderer.material.SetFloat("_Amplitude_HumanWave", 0.01f);
+
+            //ConstantColor
+            _meshRenderer.material.SetFloat("_R_ConstantColor", 0f);
+            _meshRenderer.material.SetFloat("_G_ConstantColor", 0f);
+            _meshRenderer.material.SetFloat("_B_ConstantColor", 0f);
+            _meshRenderer.material.SetFloat("_Blend_ConstantColor", 0f);
         }
 
         private void SetDropdownOption()
@@ -207,7 +258,7 @@ namespace W0NYV.IkegameX
                 _dropdown.AddOptions(new List<string> {device.name});
             }
 
-            if(WebCamTexture.devices.Length != 0) _selfieSegmentationBarracudaTest.SetWebCamera(0);
+            if(WebCamTexture.devices.Length != 0) _selfieSegmentationBarracuda.SetWebCamera(0);
         }
     }
 }
