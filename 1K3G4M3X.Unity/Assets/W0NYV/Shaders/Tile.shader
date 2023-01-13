@@ -1,24 +1,20 @@
-Shader "Unlit/Test"
+Shader "CustomPostProcess/Tile"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _MaskTex ("MaskTexture", 2D) = "white" {}
+        _BPM ("BPM", float) = 120.0
     }
     SubShader
     {
-        Tags { "Queue" = "Transparent" "RenderType"="Transparent" }
-        LOD 100
+        // No culling or depth
+        Cull Off ZWrite Off ZTest Always
 
         Pass
         {
-            Blend SrcAlpha OneMinusSrcAlpha
-
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
 
@@ -31,33 +27,36 @@ Shader "Unlit/Test"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
-
-            sampler2D _MainTex;
-            sampler2D _MaskTex;
-            float4 _MainTex_ST;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                o.uv = v.uv;
                 return o;
             }
 
+            sampler2D _MainTex;
+            float _BPM;
+
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                fixed4 col2 = tex2D(_MaskTex, i.uv);
+                float t = _Time.y * _BPM / 60.0;
 
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
 
-                col.w = col2.x;
+                float2 _uv = i.uv;
+                float2 p = (_uv - 0.5) * 2.0;
+
+                p.x += 0.75;
+                _uv.x += 0.25;
+
+                float l = step(length(p.x), 1.0/4.0);
+                
+                fixed4 col = tex2D(_MainTex, _uv);
+                //fixed4 col = fixed4(_uv.x, _uv.y, 1.0, 1.0) * fixed4(l, l, l, 1.0);
+                //fixed4 col = fixed4(l, l, l, 1.0);
 
                 return col;
             }
