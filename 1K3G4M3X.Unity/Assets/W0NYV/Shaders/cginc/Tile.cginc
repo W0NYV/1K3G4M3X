@@ -54,3 +54,12 @@ fixed4 TileAlpha(float2 p, float t)
 
     return fixed4(l, l, l, seq);
 }
+
+float2 Tile2(float t, float2 uv)
+{
+    float seq = floor(fmod(t, 4.0)) + 1.0;
+
+    float2 _uv = frac(uv * seq);
+
+    return _uv;
+}

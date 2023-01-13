@@ -34,6 +34,9 @@ Shader "Unlit/HumanSegmentation"
         _G_ConstantColor ("G_ConstantColor", Range(0.0, 1.0)) = 1.0
         _B_ConstantColor ("B_ConstantColor", Range(0.0, 1.0)) = 1.0
         _Blend_ConstantColor ("Blend_ConstantColor", Range(0.0, 1.0)) = 1.0
+
+        // Tile2
+        [Toggle(_USE_TILE2)]_UseTile2("Use Tile 2", Float) = 0
     }
     SubShader
     {
@@ -53,13 +56,14 @@ Shader "Unlit/HumanSegmentation"
             #pragma multi_compile _ _USE_TILE
             #pragma multi_compile _ _USE_BLOCK_WAVE
             #pragma multi_compile _ _USE_CONSTANT_COLOR
+            #pragma multi_compile _ _USE_TILE2
 
             // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
             #include "./cginc/HumanWave.cginc"
-            #include "./cginc/TileAlpha.cginc"
+            #include "./cginc/Tile.cginc"
             #include "./cginc/Pixelate.cginc"
 
             struct appdata
@@ -129,6 +133,10 @@ Shader "Unlit/HumanSegmentation"
                 float2 p = (_uv - 0.5) * 2.0;
 
                 //UV関連
+                #if _USE_TILE2
+                _uv = Tile2(t, _uv);
+                #endif
+
                 #if _USE_PIXELATE
                 _uv = Pixelate(t, _uv, _MaxWidth_Pixelate, _MaxHeight_Pixelate, _MinWidth_Pixelate, _MinHeight_Pixelate);
                 #endif

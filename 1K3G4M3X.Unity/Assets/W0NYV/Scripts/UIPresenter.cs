@@ -15,7 +15,8 @@ namespace W0NYV.IkegameX
         [SerializeField] private GameObject _quad;
         private MeshRenderer _meshRenderer;
         private SelfieSegmentationBarracuda _selfieSegmentationBarracuda;
-        
+        [SerializeField] private Camera _camera;
+
         //View
         [SerializeField] private Dropdown _dropdown;
 
@@ -49,6 +50,12 @@ namespace W0NYV.IkegameX
         [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_G;
         [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_B;
         [SerializeField] private Klak.VJUI.Knob _ConstantColorKnob_Blend;
+
+        [Header("Tile2")]
+        [SerializeField] private Klak.VJUI.Toggle _Tile2Toggle;
+
+        [Header("FeedbackModoki")]
+        [SerializeField] private Klak.VJUI.Toggle _FeedbackModokiToggle;
 
         private void Awake() {
 
@@ -216,7 +223,34 @@ namespace W0NYV.IkegameX
                 _meshRenderer.material.SetFloat("_Blend_ConstantColor", value);
             });
             #endregion
+            
+            #region Tile2
+            _Tile2Toggle.onValueChanged.AddListener(val => 
+            {
+                if(val)
+                {
+                    _meshRenderer.material.EnableKeyword("_USE_TILE2");
+                }
+                else
+                {
+                    _meshRenderer.material.DisableKeyword("_USE_TILE2");
+                }
+            });
+            #endregion
 
+            #region FeedbackModoki
+            _FeedbackModokiToggle.onValueChanged.AddListener(val => 
+            {
+                if(val)
+                {
+                    _camera.clearFlags = CameraClearFlags.Nothing;
+                }
+                else
+                {
+                    _camera.clearFlags = CameraClearFlags.SolidColor;
+                }
+            });
+            #endregion
         }
 
         private void GetComponentToQuad()
