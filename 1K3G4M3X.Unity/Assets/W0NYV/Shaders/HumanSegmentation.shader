@@ -7,8 +7,15 @@ Shader "Unlit/HumanSegmentation"
 
         _BPM ("BPM", float) = 120.0
 
+        // Pixelate
+        [Toggle(_USE_PIXELATE)]_UsePixelate("Use Pixelate", Float) = 0
+        _MaxWidth_Pixelate ("MaxWidth_Pixelate", float) = 1920.0
+        _MaxHeight_Pixelate ("MaxHeight_Pixelate", float) = 1080.0
+        _MinWidth_Pixelate ("MinWidth_Pixelate", float) = 160.0
+        _MinHeight_Pixelate ("MinHeight_Pixelate", float) = 90.0
+
         // BlockWave
-        _IsOn_Wave ("IsOn_Wave", float) = 0.0
+        [Toggle(_USE_BLOCK_WAVE)]_UseBlockWave("Use Block Wave", Float) = 0
         _Segment_Wave ("Segment_Wave", Range(1.0, 50.0)) = 20.0
         _Gap_Wave ("Gap_Wave", Range(1.0, 10.0)) = 2.0
         _Amplitude_Wave ("Amplitude_Wave", Range(0.0, 1.0)) = 0.1
@@ -20,9 +27,6 @@ Shader "Unlit/HumanSegmentation"
         _Offset_HumanWave ("Offset_HumanWave", Range(0.0, 1.6)) = 0.05
         _Frequency_HumanWave ("Frequency_HumanWave", Range(0.1, 1.0)) = 0.25
         _Amplitude_HumanWave ("Amplitude_HumanWave", Range(0.01, 0.1)) = 0.05
-
-        // Tile
-        _IsOn_Tile ("IsOn_Tile", float) = 0.0
     }
     SubShader
     {
@@ -37,7 +41,10 @@ Shader "Unlit/HumanSegmentation"
             #pragma vertex vert
             #pragma fragment frag
 
+            #pragma multi_compile _ _USE_PIXELATE
             #pragma multi_compile _ _USE_HUMAN_WAVE
+            #pragma multi_compile _ _USE_TILE
+            #pragma multi_compile _ _USE_BLOCK_WAVE
 
             // make fog work
             #pragma multi_compile_fog
@@ -45,6 +52,7 @@ Shader "Unlit/HumanSegmentation"
             #include "UnityCG.cginc"
             #include "./cginc/HumanWave.cginc"
             #include "./cginc/TileAlpha.cginc"
+            #include "./cginc/Pixelate.cginc"
 
             struct appdata
             {
@@ -64,11 +72,16 @@ Shader "Unlit/HumanSegmentation"
 
             float _BPM;
 
+            //Pixelate
+            float _MaxWidth_Pixelate;
+            float _MaxHeight_Pixelate;
+            float _MinWidth_Pixelate;
+            float _MinHeight_Pixelate;
+
             //BlockWave
             float _Segment_Wave;
             float _Gap_Wave;
             float _Amplitude_Wave;
-            float _IsOn_Wave;
 
             //HumanWave
             float _Speed_HumanWave;
@@ -76,9 +89,6 @@ Shader "Unlit/HumanSegmentation"
             float _Offset_HumanWave;
             float _Frequency_HumanWave;
             float _Amplitude_HumanWave;
-
-            //Tile
-            float _IsOn_Tile;
 
             float4 _MainTex_ST;
 
@@ -105,19 +115,24 @@ Shader "Unlit/HumanSegmentation"
                 float2 p = (_uv - 0.5) * 2.0;
 
                 //UV関連
-                _uv.x += _IsOn_Wave == 1.0 ? sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave : 0.0;
-                
-                if(_IsOn_Tile == 1)
+                #if _USE_PIXELATE
+                _uv = Pixelate(t, _uv, _MaxWidth_Pixelate, _MaxHeight_Pixelate, _MinWidth_Pixelate, _MinHeight_Pixelate);
+                #endif
+
+                #if _USE_BLOCK_WAVE
+                _uv.x += sin(floor((i.uv.y*_Segment_Wave))/_Gap_Wave + t) * _Amplitude_Wave;
+                #endif
+
+                #if _USE_TILE
+                if(TileAlpha(p, t).w > 3.9)
                 {
-                    if(TileAlpha(p, t).w > 3.9)
-                    {
-                        _uv.y = (frac(_uv.y*4.0) / 4.0) + 0.375;
-                    }
-                    else
-                    {
-                        _uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
-                    }
+                    _uv.y = (frac(_uv.y*4.0) / 4.0) + 0.375;
                 }
+                else
+                {
+                    _uv.x = (frac(_uv.x*4.0) / 4.0) + 0.375;
+                }
+                #endif
 
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, _uv);
@@ -133,7 +148,9 @@ Shader "Unlit/HumanSegmentation"
 
                 col.w = col2.x;
 
-                col = _IsOn_Tile == 1.0 ? col * fixed4(TileAlpha(p, t).rgb, 1.0) : col;
+                #if _USE_TILE
+                col = col * fixed4(TileAlpha(p, t).rgb, 1.0);
+                #endif
 
                 return col;
             }

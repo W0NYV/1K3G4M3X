@@ -12,8 +12,6 @@ namespace W0NYV.IkegameX
         //Model
         private CalcTempo _calcTempo;
 
-        [SerializeField] private CameraFilter _cameraFilter;
-
         [SerializeField] private GameObject _quad;
         private MeshRenderer _meshRenderer;
         private SelfieSegmentationBarracudaTest _selfieSegmentationBarracudaTest;
@@ -52,6 +50,7 @@ namespace W0NYV.IkegameX
             //誰がnewする問題, Extenject~~~
             _calcTempo = new CalcTempo();
 
+            InitShaderProperty();
             SetDropdownOption();
 
             _dropdown.onValueChanged.AddListener(val => 
@@ -64,8 +63,6 @@ namespace W0NYV.IkegameX
                 _calcTempo.SetElement();
                 _calcTempo.Calculate();
                 _tempoText.text = "TEMPO: " + _calcTempo.GetBPM().ToString("0.00");
-
-                _cameraFilter.Filter.SetFloat("_BPM", _calcTempo.GetBPM());
                 _meshRenderer.material.SetFloat("_BPM", _calcTempo.GetBPM());
 
             });
@@ -73,7 +70,14 @@ namespace W0NYV.IkegameX
             #region Pixelate
             _pixelateToggle.onValueChanged.AddListener(val => 
             {
-                _cameraFilter.enabled = val;
+                if(val)
+                {
+                    _meshRenderer.material.EnableKeyword("_USE_PIXELATE");
+                }
+                else
+                {
+                    _meshRenderer.material.DisableKeyword("_USE_PIXELATE");
+                }
             });
             #endregion
 
@@ -82,11 +86,11 @@ namespace W0NYV.IkegameX
             {
                 if(val)
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_Wave", 1.0f);
+                    _meshRenderer.material.EnableKeyword("_USE_BLOCK_WAVE");
                 }
                 else
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_Wave", 0.0f);
+                    _meshRenderer.material.DisableKeyword("_USE_BLOCK_WAVE");
                 }
             });
 
@@ -159,11 +163,11 @@ namespace W0NYV.IkegameX
             {
                 if(val)
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_Tile", 1.0f);
+                    _meshRenderer.material.EnableKeyword("_USE_TILE");
                 }
                 else
                 {
-                    _meshRenderer.material.SetFloat("_IsOn_Tile", 0.0f);
+                    _meshRenderer.material.DisableKeyword("_USE_TILE");
                 }
             });
             #endregion
@@ -176,7 +180,26 @@ namespace W0NYV.IkegameX
             _quad.TryGetComponent<SelfieSegmentationBarracudaTest>(out _selfieSegmentationBarracudaTest);
         }
 
-        //本当はdropdownが持っておくべき
+        //本当はUIPresenterに書きたくない
+
+        private void InitShaderProperty()
+        {            
+            
+            _meshRenderer.material.SetFloat("_BPM", 120.0f);
+
+            //BlockWave
+            _meshRenderer.material.SetFloat("_Segment_Wave", 1.0f);
+            _meshRenderer.material.SetFloat("_Gap_Wave", 1.0f);
+            _meshRenderer.material.SetFloat("_Amplitude_Wave", 0.0f);
+
+            //HumanWave
+            _meshRenderer.material.SetFloat("_Speed_HumanWave", 0.1f);
+            _meshRenderer.material.SetFloat("_RotSpeed_HumanWave", 0.0f);
+            _meshRenderer.material.SetFloat("_Offset_HumanWave", 0.0f);
+            _meshRenderer.material.SetFloat("_Frequency_HumanWave", 0.1f);
+            _meshRenderer.material.SetFloat("_Amplitude_HumanWave", 0.01f);
+        }
+
         private void SetDropdownOption()
         {
             foreach (var device in WebCamTexture.devices)
