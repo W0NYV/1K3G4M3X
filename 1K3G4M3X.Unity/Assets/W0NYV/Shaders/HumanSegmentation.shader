@@ -37,6 +37,9 @@ Shader "Unlit/HumanSegmentation"
 
         // Tile2
         [Toggle(_USE_TILE2)]_UseTile2("Use Tile 2", Float) = 0
+
+        // Threshold
+        _Threshold ("Threshold", Range(0.01, 1.0)) = 0.01
     }
     SubShader
     {
@@ -108,6 +111,9 @@ Shader "Unlit/HumanSegmentation"
             float _B_ConstantColor;
             float _Blend_ConstantColor;
 
+            //Threshold
+            float _Threshold;
+
             float4 _MainTex_ST;
 
             v2f vert (appdata v)
@@ -159,6 +165,8 @@ Shader "Unlit/HumanSegmentation"
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, _uv);
                 fixed4 col2 = tex2D(_MaskTex, _uv);
+
+                if(_Threshold != 0.01) col2.rgb = step(_Threshold, col2.rgb);
 
                 //色関連
                 #if _USE_HUMAN_WAVE

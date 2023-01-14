@@ -57,6 +57,9 @@ namespace W0NYV.IkegameX
         [Header("FeedbackModoki")]
         [SerializeField] private Klak.VJUI.Toggle _FeedbackModokiToggle;
 
+        [Header("Threshold")]
+        [SerializeField] private Klak.VJUI.Knob _ThresholdKnob;
+
         private void Awake() {
 
             GetComponentToQuad();
@@ -251,6 +254,15 @@ namespace W0NYV.IkegameX
                 }
             });
             #endregion
+        
+            #region Threshold
+            _ThresholdKnob.onValueChanged.AddListener(val =>
+            {
+                float value = val * 0.99f + 0.01f;
+                _meshRenderer.material.SetFloat("_Threshold", value);
+            });
+            #endregion
+
         }
 
         private void GetComponentToQuad()
