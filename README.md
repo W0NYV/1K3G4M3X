@@ -5,6 +5,8 @@
   <img src="https://user-images.githubusercontent.com/15060080/212593537-1a320219-cd25-472d-9514-ddfeeaeb8fa6.gif" width="300">
 </p>
 
+model - [MÖBIUS](https://twitter.com/MOBIUS_music_dj)
+
 人物が映っているカメラ映像から、背景を透過し、エフェクトを書けて遊ぶツールです。
 
 📘Usage
