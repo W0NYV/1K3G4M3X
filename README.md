@@ -29,7 +29,7 @@ model - [MÖBIUS](https://twitter.com/MOBIUS_music_dj)
 
 ### 🏁Threshold
 
-アルファ値のしきい値を設定します。
+アルファのしきい値を設定します。
 
 ### 💠Pixelate
 
