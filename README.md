@@ -27,6 +27,10 @@ model - [MÖBIUS](https://twitter.com/MOBIUS_music_dj)
 
 ある一定の感覚でTempoボタンを押すと、その感覚で叩いたTEMPOを取得します。これは一部のエフェクトに影響します。
 
+### 🏁Threshold
+
+アルファ値のしきい値を設定します。
+
 ### 💠Pixelate
 
 Tempoに合わせて、解像度が低くなったり元に戻ったりします。
