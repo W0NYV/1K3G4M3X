@@ -7,7 +7,7 @@
 
 model - [MÖBIUS](https://twitter.com/MOBIUS_music_dj)
 
-人物が映っているカメラ映像から、背景を透過し、エフェクトを書けて遊ぶツールです。
+人物が映っているカメラ映像から、[背景を透過](https://github.com/creativeIKEP/SelfieSegmentationBarracuda)し、エフェクトを書けて遊ぶツールです。
 
 📘Usage
 -------
